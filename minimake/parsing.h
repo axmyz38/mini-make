@@ -1,4 +1,4 @@
-#ifndef 
+#ifndef HEADER
 #define HEADER
 
 typedef enum t_type {
@@ -12,8 +12,12 @@ typedef enum t_type {
 
 struct line {
   int size;
-  enum t_type type;
+  t_type type;
   char *content;
+  union {
+    struct {char *name; char *value;} var;
+    struct {char *target; char **deps;} rule;
+  } data;
   struct line *next;
   struct line *prev;
 };

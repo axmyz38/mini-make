@@ -19,6 +19,9 @@ t_type get_type(char *line) //donne le enum type
       return command;
   if (line[0] == ' ')
     return invalid;
+  if (line[0] == '\n')
+    return empty;
+
 
   int i = 0;
   while (line[i])
@@ -39,7 +42,7 @@ struct line *init_line(void) //initialsie une line
 {
   struct line *new = malloc(sizeof(struct line));
   if (!new)
-    return -1;
+    return NULL;
   new->size = 0;
   new->type = 0;
   new->content = NULL;
@@ -89,17 +92,80 @@ void append(struct mmake *m, struct line *l) // s occupe du double chainage
 
 
 
-
-
-
-
-
-struct mmake *parse(const char *filename) // fct de parsing
+char *w_space(const char *l) //enleve les espace et ptn de tab smr 
 {
+  if (!l)
+    return NULL;
+
+  char *w = malloc(strlen(l)+1);
   
+  int i = 0;
+  int j = 0;
+
+
+  while (l[i])
+  {
+    if (l[i] != ' ' && l[i] != '\t')
+    {
+      w[j] = l[i];
+      j++;
+    }
+    i++;
+  }
+  w[j] = '\0';
+  return w;
+}
+
+
+void data_clear(struct line *l)//rempli union data 
+{
+  if (l->type == var)
+  {
+    char *s = strchr(l->content, '=');
+    l->data.var.name = strndup(l->content,s - l->content);
+    s+=1;
+    l->data.var.value = strdup(s);
+  }
+  if (l->type == rule)
+  {
+    char *s = strchr(l->content, ':');
+    l->data.rule.target = w_space(strndup(l->content, s - l->content));
+    s+=1;
+    char *copy = strdup(s);
+    const char * separators = " \t";
+    char * strtoken = strtok ( copy, separators );
+    int i = 0;
+    while ( strtoken != NULL ) 
+    {
+      strtoken = strtok ( NULL, separators );
+      i++;
+    }
+    l->data.rule.deps = malloc ((i+1) * sizeof(char *));
+    i = 0;
+    char *copy2 = strdup(s);
+    strtoken = strtok(copy2, separators);
+    while ( strtoken != NULL ) 
+    {
+      l->data.rule.deps[i] = strdup(strtoken);
+      strtoken = strtok ( NULL, separators );
+      i++;
+    }
+    l->data.rule.deps[i] = NULL;
+    free(copy);
+    free(copy2);
+
+  }
+ }
+
+
+struct mmake *parse(const char *filename) // fct de parsing 
+{  
   struct mmake *new = malloc(sizeof(struct mmake));
   if (!new)
     return NULL;
+  new->size = 0;
+  new->first = NULL;
+  
 
   FILE *fp;
   char *line = NULL;
@@ -118,7 +184,11 @@ struct mmake *parse(const char *filename) // fct de parsing
 
     new_line->size = len;
     new_line->type = get_type(line);
-    new_line->content = strdup(line);
+    if (new_line->type != rule)
+      new_line->content = w_space(line);
+    else 
+      new_line->content = strdup(line);
+    data_clear(new_line);
     append(new,new_line);
   }
   fclose(fp);
@@ -127,5 +197,6 @@ struct mmake *parse(const char *filename) // fct de parsing
 
   return new;
 }
+
  
 
