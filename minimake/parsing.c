@@ -11,7 +11,7 @@
 
 
 
-t_type get_type(char *line)
+t_type get_type(char *line) //donne le enum type 
 {
   if (line[0] == '#' )
     return comment;
@@ -33,7 +33,9 @@ t_type get_type(char *line)
 
 }
 
-struct line *init_line(void)
+
+
+struct line *init_line(void) //initialsie une line 
 {
   struct line *new = malloc(sizeof(struct line));
   if (!new)
@@ -46,7 +48,12 @@ struct line *init_line(void)
   return new;
 }
 
-void append(struct mmake *m, struct line *l)
+
+
+
+
+
+void append(struct mmake *m, struct line *l) // s occupe du double chainage
 {
   if (!m)
     return;
@@ -79,38 +86,45 @@ void append(struct mmake *m, struct line *l)
   
 }
 
-struct mmake *parse(*Makefile)
+
+
+
+
+
+
+
+
+struct mmake *parse(const char *filename) // fct de parsing
 {
   
   struct mmake *new = malloc(sizeof(struct mmake));
   if (!new)
-    return -1;
+    return NULL;
 
-  FILE *file;
+  FILE *fp;
   char *line = NULL;
-  size_t line = 0;
-  ssize_t nread;
+  size_t len = 0;
+  ssize_t read;
 
   
-  fp = fopen("Makefile", "r");
+  fp = fopen( filename, "r");
     if (fp == NULL)
         exit(EXIT_FAILURE);
   while ((read = getline(&line, &len, fp)) != -1) 
   {
     struct line *new_line = init_line();
     if (!new_line)
-      return -1;
+      return NULL;
 
-    new_line = line;
     new_line->size = len;
-    new_ligne->type = get_type(new_line);
-      new_line->content = strcpy(line);
-    append(new,new_line)
+    new_line->type = get_type(line);
+    new_line->content = strdup(line);
+    append(new,new_line);
   }
+  fclose(fp);
   if (line)
      free(line);
 
-    exit(EXIT_SUCCESS);
   return new;
 }
  
