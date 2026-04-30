@@ -1,0 +1,7 @@
+tests:
+  - args: [ "-f", "tests/Minimakefile.in", "-p" ]
+    exit_code: 0
+    output_file: "tests/Minimakefile.out_p"
+  - args: [ "-f", "tests/Minimakefile.in" ]
+    exit_code: 0
+    output_file: "tests/Minimakefile.out_e"

@@ -1,0 +1,6 @@
+# variables
+'CC' = 'gcc'
+
+# rules
+(all):
+	'echo Toto'
