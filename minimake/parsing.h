@@ -1,7 +1,7 @@
 #ifndef 
 #define HEADER
 
-typedef enum {
+typedef enum t_type {
   empty,
   command,
   var,
@@ -12,14 +12,15 @@ typedef enum {
 
 struct line {
   int size;
-  enum type;
+  enum t_type type;
+  char *content;
   struct line *next;
   struct line *prev;
-},
+};
 
 struct mmake {
   int size;
   struct line *first;
-},
+};
 
 #endif
