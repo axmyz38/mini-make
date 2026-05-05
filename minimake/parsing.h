@@ -1,7 +1,7 @@
 #ifndef HEADER
 #define HEADER
 
-typedef enum t_type {
+enum t_type {
   empty,
   command,
   var,
@@ -12,7 +12,7 @@ typedef enum t_type {
 
 struct line {
   int size;
-  t_type type;
+  enum t_type type;
   char *content;
   union {
     struct {char *name; char *value;} var;
@@ -26,5 +26,12 @@ struct mmake {
   int size;
   struct line *first;
 };
+
+enum t_type get_type(char *line);
+struct line *init_line(void);
+void append(struct mmake *m, struct line *l);
+char *w_space(const char *l);
+void data_clear(struct line *l);
+struct mmake *parse(const char *filename);
 
 #endif

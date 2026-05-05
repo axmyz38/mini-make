@@ -11,10 +11,10 @@
 
 
 
-t_type get_type(char *line) //donne le enum type 
+enum t_type get_type(char *line) //donne le enum type 
 {
   if (line[0] == '#' )
-    return comment;
+    return commment;
   if (line[0] == '\t')
       return command;
   if (line[0] == ' ')
@@ -126,7 +126,7 @@ void data_clear(struct line *l)//rempli union data
     s+=1;
     l->data.var.value = strdup(s);
   }
-  if (l->type == rule)
+  else if (l->type == rule)
   {
     char *s = strchr(l->content, ':');
     l->data.rule.target = w_space(strndup(l->content, s - l->content));
@@ -197,6 +197,4 @@ struct mmake *parse(const char *filename) // fct de parsing
 
   return new;
 }
-
- 
 
