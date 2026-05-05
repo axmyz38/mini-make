@@ -1,22 +1,10 @@
 CC = gcc
-CFLAGS = -Wall 
-
-
-SRCS = main.c parsing.c
-OBJS = $(SRCS:.c=.o)
-
-
+CFLAGS = -Wall -g
 TARGET = minimake
+SRCS = main.c parsing.c
 
-
-all: $(TARGET)
-
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) -o 
-
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c 
+all:
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TARGET)
