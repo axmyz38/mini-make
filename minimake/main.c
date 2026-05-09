@@ -17,7 +17,7 @@ void p_help(void)
         \"-h\"            to display the helper\n\
         \"-p\"            to print the rules and variables\n\
         \"-f\" <filename> to change the make config file, \"Makefile\" by default\n\
-      TARGETS are target name of makefile rule to execute\n"
+    TARGETS are target name of makefile rule to execute\n"
 );
 }
 
@@ -62,12 +62,16 @@ void p_print(struct mmake *m)
       printf("\n");
       
       struct line *next = current->next;
-      while(next && next->type == command)
+      while(next && (next->type == command || next->type == empty))
       {
-        char *content = next->content+1;
-        const char *t = strchr(content, '\n');
+        if (next->type == command)
+        {
+        char *content = next->content;
+        while (*content == '\t' || *content == ' ')
+            content++;
         content[strcspn(content, "\n")] = '\0';
         printf("\t'%s'\n", content);
+        }
         next = next->next;
       }
       

@@ -90,10 +90,29 @@ void append(struct mmake *m, struct line *l) // s occupe du double chainage
 }
 
 
+char *replace(char *str, char *pattern, char *rep)
+{
+  char *f = strstr(str,pattern);
+  if (!f)
+    return str;
+
+  size_t new_l = strlen(str) - strlen(pattern) + strlen(rep) + 1;
+  char *new = malloc(new_l+1);
+  strncpy(new, str, f - str);
+  new[f - str] = '\0';
+  strcat(new, rep);
+  strcat(new, f + strlen(pattern));
+  free(str);
+  return new;
+}
+
 
 
 char *w_space(const char *l) //enleve les espace et ptn de tab smr 
 {
+  if(!l)
+    return NULL;
+
   while (*l == ' ' || *l == '\t')
     l++;
   char *w = strdup(l);
@@ -101,6 +120,21 @@ char *w_space(const char *l) //enleve les espace et ptn de tab smr
   while(i>=0 && (w[i] == ' ' || w[i] == '\t' || w[i] == '\n'))
     w[i--] = '\0';
   return w;
+}
+
+char *w_space_debut_fin(const char *l)// w_space sans tab :(
+{
+  if(!l)
+    return NULL;
+
+  while (*l == ' ' || *l == '\t' )
+    l++;
+  char *w = strdup(l);
+  int i = strlen(w)-1;
+  while(i>=0 && (w[i] == ' '  || w[i] == '\n'))
+    w[i--] = '\0';
+  return w;
+
 }
 
 char *expe(char *val, struct mmake *m)
@@ -115,7 +149,7 @@ char *expe(char *val, struct mmake *m)
       snprintf(tab, sizeof(tab), "${%s}", current->data.var.name);
       while (strstr(new, tab))
       {
-        new = expe(new, tab, current->data.var.value);
+        new = replace(new, tab, current->data.var.value);
       }
     }
     current = current->next;
@@ -123,15 +157,16 @@ char *expe(char *val, struct mmake *m)
   return new;
 }
 
-void data_clear(struct line *l)//rempli union data 
+void data_clear(struct line *l, struct mmake *m)//rempli union data 
 {
   if (l->type == var)
   {
     char *s = strchr(l->content, '=');
     l->data.var.name = w_space(strndup(l->content,s - l->content));
     s+=1;
-    l->data.var.value = w_space(strdup(s));
+    l->data.var.value = w_space_debut_fin(strdup(s+1));
     l->data.var.value[strcspn(l->data.var.value, "\n")] = '\0';
+    l->data.var.value = expe(l->data.var.value, m);
   }
   else if (l->type == rule)
   {
@@ -158,6 +193,8 @@ void data_clear(struct line *l)//rempli union data
       i++;
     }
     l->data.rule.deps[i] = NULL;
+    for (int j = 0; l->data.rule.deps[j]; j++)
+      l->data.rule.deps[j] = expe(l->data.rule.deps[j], m); 
     free(copy);
     free(copy2);
 
@@ -192,7 +229,7 @@ struct mmake *parse(const char *filename) // fct de parsing
     new_line->size = len;
     new_line->type = get_type(line);
     new_line->content = strdup(line);
-    data_clear(new_line);
+    data_clear(new_line,new);
     append(new,new_line);
   }
   fclose(fp);

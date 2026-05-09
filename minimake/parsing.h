@@ -31,7 +31,7 @@ enum t_type get_type(char *line);
 struct line *init_line(void);
 void append(struct mmake *m, struct line *l);
 char *w_space(const char *l);
-void data_clear(struct line *l);
+void data_clear(struct line *l, struct mmake *m);
 struct mmake *parse(const char *filename);
 
 #endif
