@@ -17,8 +17,6 @@ enum t_type get_type(char *line) //donne le enum type
     return commment;
   if (line[0] == '\t')
       return command;
-  if (line[0] == ' ')
-    return invalid;
   if (line[0] == '\n')
     return empty;
 
@@ -28,6 +26,8 @@ enum t_type get_type(char *line) //donne le enum type
   {
     if (line[i] == ':')
         return rule;
+    
+
     if (line[i] == '=')
         return var;
     i++;
@@ -94,37 +94,44 @@ void append(struct mmake *m, struct line *l) // s occupe du double chainage
 
 char *w_space(const char *l) //enleve les espace et ptn de tab smr 
 {
-  if (!l)
-    return NULL;
-
-  char *w = malloc(strlen(l)+1);
-  
-  int i = 0;
-  int j = 0;
-
-
-  while (l[i])
-  {
-    if (l[i] != ' ' && l[i] != '\t')
-    {
-      w[j] = l[i];
-      j++;
-    }
-    i++;
-  }
-  w[j] = '\0';
+  while (*l == ' ' || *l == '\t')
+    l++;
+  char *w = strdup(l);
+  int i = strlen(w)-1;
+  while(i>=0 && (w[i] == ' ' || w[i] == '\t' || w[i] == '\n'))
+    w[i--] = '\0';
   return w;
 }
 
+char *expe(char *val, struct mmake *m)
+{
+  char *new = strdup(val);
+  struct line *current = m->first;
+  while (current)
+  {
+    if (current->type == var)
+    {
+      char tab[300000];
+      snprintf(tab, sizeof(tab), "${%s}", current->data.var.name);
+      while (strstr(new, tab))
+      {
+        new = expe(new, tab, current->data.var.value);
+      }
+    }
+    current = current->next;
+  }
+  return new;
+}
 
 void data_clear(struct line *l)//rempli union data 
 {
   if (l->type == var)
   {
     char *s = strchr(l->content, '=');
-    l->data.var.name = strndup(l->content,s - l->content);
+    l->data.var.name = w_space(strndup(l->content,s - l->content));
     s+=1;
-    l->data.var.value = strdup(s);
+    l->data.var.value = w_space(strdup(s));
+    l->data.var.value[strcspn(l->data.var.value, "\n")] = '\0';
   }
   else if (l->type == rule)
   {
@@ -132,7 +139,7 @@ void data_clear(struct line *l)//rempli union data
     l->data.rule.target = w_space(strndup(l->content, s - l->content));
     s+=1;
     char *copy = strdup(s);
-    const char * separators = " \t";
+    const char * separators = " \t\n";
     char * strtoken = strtok ( copy, separators );
     int i = 0;
     while ( strtoken != NULL ) 
@@ -175,7 +182,7 @@ struct mmake *parse(const char *filename) // fct de parsing
   
   fp = fopen( filename, "r");
     if (fp == NULL)
-        exit(EXIT_FAILURE);
+        return NULL;
   while ((read = getline(&line, &len, fp)) != -1) 
   {
     struct line *new_line = init_line();
@@ -184,10 +191,7 @@ struct mmake *parse(const char *filename) // fct de parsing
 
     new_line->size = len;
     new_line->type = get_type(line);
-    if (new_line->type != rule)
-      new_line->content = w_space(line);
-    else 
-      new_line->content = strdup(line);
+    new_line->content = strdup(line);
     data_clear(new_line);
     append(new,new_line);
   }
@@ -197,4 +201,6 @@ struct mmake *parse(const char *filename) // fct de parsing
 
   return new;
 }
+
+
 

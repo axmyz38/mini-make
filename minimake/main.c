@@ -13,11 +13,11 @@
 void p_help(void)
 {
   printf("Usage: minimake [OPTIONS] [TARGETS]\n\
-    \tOPTIONS can be:\n\
-        \t\"-h\"            to display the helper\n\
-        \t\"-p\"            to print the rules and variables\n\
-        \t\"-f\" <filename> to change the make config file, \"Makefile\" by default\n\
-    \tTARGETS are target name of makefile rule to execute\n"
+    OPTIONS can be:\n\
+        \"-h\"            to display the helper\n\
+        \"-p\"            to print the rules and variables\n\
+        \"-f\" <filename> to change the make config file, \"Makefile\" by default\n\
+      TARGETS are target name of makefile rule to execute\n"
 );
 }
 
@@ -26,6 +26,8 @@ void p_print(struct mmake *m)
 {
   if (!m)
     return;
+  
+  printf("# variables\n");
 
   struct line *current = m->first; 
 
@@ -33,10 +35,53 @@ void p_print(struct mmake *m)
 
   while (current)
   {
-    printf("%s\n", current->content);
+    if (current->type == var)
+    {
+      printf("'%s' = '%s'\n", current->data.var.name, current->data.var.value);
+      current = current->next;
+      
+    }
+    else 
+      current = current->next;
+
+  }
+
+  printf("\n# rules\n");
+
+  current = m->first;
+
+  while (current)
+  {
+    if (current->type == rule)
+    {
+      printf("(%s):", current->data.rule.target);
+      for (int i = 0; current->data.rule.deps[i]; i++)
+      {
+        printf(" [%s]", current->data.rule.deps[i]);
+      }
+      printf("\n");
+      
+      struct line *next = current->next;
+      while(next && next->type == command)
+      {
+        char *content = next->content+1;
+        const char *t = strchr(content, '\n');
+        content[strcspn(content, "\n")] = '\0';
+        printf("\t'%s'\n", content);
+        next = next->next;
+      }
+      
+    }
     current = current->next;
   }
 }
+
+
+
+
+
+
+
 
 
 
