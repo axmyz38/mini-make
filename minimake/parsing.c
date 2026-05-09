@@ -137,11 +137,11 @@ char *w_space_debut_fin(const char *l)// w_space sans tab :(
 
 }
 
-char *expe(char *val, struct mmake *m)
+char *expe(char *val, struct mmake *m, struct line *s)
 {
   char *new = strdup(val);
   struct line *current = m->first;
-  while (current)
+  while (current && current!=s)
   {
     if (current->type == var)
     {
@@ -154,6 +154,17 @@ char *expe(char *val, struct mmake *m)
     }
     current = current->next;
   }
+
+  char *p=NULL;
+  while ((p = strstr(new, "${")))
+  {
+    char *e=strchr(p,'}');
+    if(!e) return new;
+    char pat[3000000];
+    strncpy(pat,p,e - p +1);
+    pat[e-p+1] = '\0';
+    new = replace(new,pat,"");
+  }
   return new;
 }
 
@@ -164,9 +175,9 @@ void data_clear(struct line *l, struct mmake *m)//rempli union data
     char *s = strchr(l->content, '=');
     l->data.var.name = w_space(strndup(l->content,s - l->content));
     s+=1;
-    l->data.var.value = w_space_debut_fin(strdup(s+1));
+    l->data.var.value = w_space_debut_fin(strdup(s));
     l->data.var.value[strcspn(l->data.var.value, "\n")] = '\0';
-    l->data.var.value = expe(l->data.var.value, m);
+    l->data.var.value = expe(l->data.var.value, m,l);
   }
   else if (l->type == rule)
   {
@@ -194,7 +205,7 @@ void data_clear(struct line *l, struct mmake *m)//rempli union data
     }
     l->data.rule.deps[i] = NULL;
     for (int j = 0; l->data.rule.deps[j]; j++)
-      l->data.rule.deps[j] = expe(l->data.rule.deps[j], m); 
+      l->data.rule.deps[j] = expe(l->data.rule.deps[j], m, l); 
     free(copy);
     free(copy2);
 
