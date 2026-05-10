@@ -54,20 +54,23 @@ int exec(struct mmake *m, char *name, char *need)
       char *content = cmd->content;
       while (*content == '\t' || *content == ' ')
         content++;
-      content[strcspn(content, "\n")] = '\0';
-      content = expe(content, m, NULL);
-      printf("%s\n",content);
+      char *copy = strdup(content);
+      copy[strcspn(copy, "\n")] = '\0';
+      char *exp = expe(copy,m,NULL);
+      free(copy);
+      printf("%s\n",exp);
       fflush(stdout);
       pid_t pid = fork();
       if (pid == 0)
       {
-        execl("/bin/sh","/bin/sh", "-c", content,NULL);
+        execl("/bin/sh","/bin/sh", "-c", exp,NULL);
         exit(EXIT_FAILURE);
       }
 
       int status;
       waitpid(pid,&status,0);
       int ret = WEXITSTATUS(status);
+      free(exp);
       if(ret!=0)
       {
         printf("minimake: *** [%s] Error %d\n", name, ret);
