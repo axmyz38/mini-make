@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -Wextra -fsanitize=address -g
 
 all:
 	$(CC) $(CFLAGS) -o minimake main.c parsing.c exec.c

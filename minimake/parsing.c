@@ -177,16 +177,25 @@ void data_clear(struct line *l, struct mmake *m)//rempli union data
   if (l->type == var)
   {
     char *s = strchr(l->content, '=');
-    l->data.var.name = w_space(strndup(l->content,s - l->content));
+    char *tmp = strndup(l->content,s - l->content);
+   
+    l->data.var.name = w_space(tmp);
+    free(tmp);
     s+=1;
-    l->data.var.value = w_space_debut_fin(strdup(s));
+    char *tmp2 = strdup(s);
+    l->data.var.value = w_space_debut_fin(tmp2);
+    free(tmp2);
     l->data.var.value[strcspn(l->data.var.value, "\n")] = '\0';
-    l->data.var.value = expe(l->data.var.value, m,l);
+    char *old_v = l->data.var.value;
+    l->data.var.value = expe(old_v, m,l);
+    free(old_v);
   }
   else if (l->type == rule)
   {
     char *s = strchr(l->content, ':');
-    l->data.rule.target = w_space(strndup(l->content, s - l->content));
+    char *tmp3 = strndup(l->content, s - l->content);
+    l->data.rule.target = w_space(tmp3);
+    free(tmp3);
     s+=1;
     char *copy2= strdup(s);
     const char *separators = " \t\n";
@@ -211,8 +220,9 @@ void data_clear(struct line *l, struct mmake *m)//rempli union data
     l->data.rule.deps[i] = NULL;
     for (int j = 0; l->data.rule.deps[j]; j++)
     {
-      
-      l->data.rule.deps[j] = expe(l->data.rule.deps[j], m, l);
+      char *old = l->data.rule.deps[j];
+      l->data.rule.deps[j] = expe(old, m, l);
+      free(old);
       
     }
 
@@ -259,4 +269,34 @@ struct mmake *parse(const char *filename) // fct de parsing
 }
 
 
+void free_m(struct mmake *m)
+{
+  if (!m) 
+    return;
 
+  struct line *cur = m->first;
+  while(cur)
+  {
+    struct line *next = cur->next;
+    free(cur->content);
+    if (cur->type == var)
+    {
+      free(cur->data.var.name);
+      free(cur->data.var.value);
+
+    }
+    else if (cur->type == rule)
+    {
+      free(cur->data.rule.target);
+      for (int i = 0; cur->data.rule.deps[i]; i++)
+      {
+        free(cur->data.rule.deps[i]);
+      }
+      free(cur->data.rule.deps);
+    }
+    free(cur);
+    cur = next;
+  }
+  free(m);
+
+}

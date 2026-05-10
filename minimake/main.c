@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
   int pprint = 0;
 
   char *filename = "Makefile";
-
+  int fil = 0;
   
 
   for (int i = 1; i < argc; i++)
@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
     if (strcmp(argv[i], "-h")==0)
     {
       p_help();
+      
       return 0;
     }
   }
@@ -118,9 +119,11 @@ int main(int argc, char *argv[])
       if (i+1>=argc)
       {
         printf("pas de fichier \n");
+        
         return 2;
       }
       filename = strdup(argv[i+1]);
+      fil++;
       i++;
       
                   
@@ -132,11 +135,16 @@ int main(int argc, char *argv[])
   if (!m) 
   {
     printf("minimake: *** No targets.  Stop.\n");
+    if(fil)
+      free(filename);
     return 1;
   }
   if (pprint != 0)
   {
     p_print(m);
+    free_m(m);
+    if(fil)
+      free(filename);
     return 0;
 
   }
@@ -171,15 +179,24 @@ int main(int argc, char *argv[])
     {
       printf("minimake: *** No targets.  Stop.\n");
       
-      
+      free_m(m);
+      if(fil)
+        free(filename);
       return 1;
 
     }
-    return exec( m, cur->data.rule.target, NULL);
-    return 0;
+    int r= exec( m, cur->data.rule.target, NULL);
+    free_m(m);
+    if(fil)
+      free(filename);
+    return r;
+    
   }
 
-
+  free_m(m);
+  if(fil)
+    free(filename);
+  return 0;
 }
 
 

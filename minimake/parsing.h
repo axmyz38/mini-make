@@ -35,6 +35,7 @@ void data_clear(struct line *l, struct mmake *m);
 struct mmake *parse(const char *filename);
 int exec(struct mmake *m, char *name, char *need);
 char *expe(char *val, struct mmake *m, struct line *s);
+void free_m(struct mmake *m);
 
 
 #endif
