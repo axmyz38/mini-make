@@ -129,7 +129,11 @@ int main(int argc, char *argv[])
   }
 
   struct mmake *m = parse(filename);
-
+  if (!m) 
+  {
+    printf("minimake: *** No targets.  Stop.\n");
+    return 1;
+  }
   if (pprint != 0)
   {
     p_print(m);
