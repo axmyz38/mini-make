@@ -130,6 +130,15 @@ int main(int argc, char *argv[])
     }
 
   }
+  
+  struct stat st;
+  if (stat(filename, &st) != 0)
+  {
+    fprintf(stderr, "minimake: *** No such file: '%s'.  Stop.\n", filename);
+    if (fil) free(filename);
+    return 3;
+  }
+
 
   struct mmake *m = parse(filename);
   if (!m) 

@@ -169,6 +169,16 @@ char *expe(char *val, struct mmake *m, struct line *s)
     pat[e-p+1] = '\0';
     new = replace(new,pat,"");
   }
+  p = NULL;
+  while ((p = strstr(new, "$(")))
+  {
+    char *e = strchr(p, ')');
+    if (!e) return new;
+    char pat[3000000];
+    strncpy(pat, p, e - p + 1);
+    pat[e - p + 1] = '\0';
+    new = replace(new, pat, "");
+  }
   return new;
 }
 
