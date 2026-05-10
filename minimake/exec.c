@@ -42,7 +42,7 @@ int exec(struct mmake *m, char *name, char *need)
   for (int i =0; exe->data.rule.deps[i]; i++)
   {
     if (exec(m, exe->data.rule.deps[i], name) != 0)
-      return 1;
+      return 2;
   }
 
   struct line *cmd = exe->next;
