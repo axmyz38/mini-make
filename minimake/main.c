@@ -96,13 +96,9 @@ int main(int argc, char *argv[])
 
   char *filename = "Makefile";
 
-  if (argc == 1)
-  {
-    parse("Makefile");
-    return 0; 
-  }
+  
 
-  for (int i = 0; i < argc; i++)
+  for (int i = 1; i < argc; i++)
   {
     if (strcmp(argv[i], "-h")==0)
     {
@@ -132,13 +128,53 @@ int main(int argc, char *argv[])
 
   }
 
-  if (pprint !=0)
+  struct mmake *m = parse(filename);
+
+  if (pprint != 0)
   {
-    p_print(parse(filename));
+    p_print(m);
+    return 0;
+
+  }
+
+  int target = 0;
+
+  for (int i = 1; i < argc; i++)
+  {
+    if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], " -h") == 0)
+      continue;
+
+    if (strcmp(argv[i], "-f")==0)
+    {
+       i++;
+       continue;
+    }
+
+    target =1;
+    exec(m, argv[i], NULL);
+  
+  }
+  
+  if (!target)
+  {
+    struct line *cur = m->first;
+
+    while(cur && cur->type != rule)
+    {
+      cur = cur->next;
+    }
+    if (!cur)
+    {
+      printf("minimake: *** No targets.  Stop.\n");
+      
+      
+      return 1;
+
+    }
+    return exec( m, cur->data.rule.target, NULL);
     return 0;
   }
-  parse(filename);
-  return 0;
+
 
 }
 

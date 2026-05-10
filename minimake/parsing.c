@@ -151,6 +151,10 @@ char *expe(char *val, struct mmake *m, struct line *s)
       {
         new = replace(new, tab, current->data.var.value);
       }
+      char tab2[300000];
+      snprintf(tab2, sizeof(tab2), "$(%s)", current->data.var.name);
+      while (strstr(new, tab2))
+        new = replace(new, tab2, current->data.var.value);
     }
     current = current->next;
   }
@@ -184,31 +188,35 @@ void data_clear(struct line *l, struct mmake *m)//rempli union data
     char *s = strchr(l->content, ':');
     l->data.rule.target = w_space(strndup(l->content, s - l->content));
     s+=1;
-    char *copy = strdup(s);
-    const char * separators = " \t\n";
-    char * strtoken = strtok ( copy, separators );
+    char *copy2= strdup(s);
+    const char *separators = " \t\n";
+    char *strtoken = strtok(copy2, separators);
     int i = 0;
-    while ( strtoken != NULL ) 
-    {
-      strtoken = strtok ( NULL, separators );
-      i++;
+    while (strtoken != NULL) 
+    { 
+      i++; strtoken = strtok(NULL, separators);
     }
-    l->data.rule.deps = malloc ((i+1) * sizeof(char *));
+    free(copy2);
+    l->data.rule.deps = malloc((i + 1) * sizeof(char *));
+    char *copy3 = strdup(s);
+    strtoken = strtok(copy3, separators);
     i = 0;
-    char *copy2 = strdup(s);
-    strtoken = strtok(copy2, separators);
-    while ( strtoken != NULL ) 
+    while (strtoken != NULL)
     {
+     
       l->data.rule.deps[i] = strdup(strtoken);
-      strtoken = strtok ( NULL, separators );
+      strtoken = strtok(NULL, separators);
       i++;
     }
     l->data.rule.deps[i] = NULL;
     for (int j = 0; l->data.rule.deps[j]; j++)
-      l->data.rule.deps[j] = expe(l->data.rule.deps[j], m, l); 
-    free(copy);
-    free(copy2);
+    {
+      
+      l->data.rule.deps[j] = expe(l->data.rule.deps[j], m, l);
+      
+    }
 
+    free(copy3); 
   }
  }
 

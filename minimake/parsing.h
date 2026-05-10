@@ -33,5 +33,8 @@ void append(struct mmake *m, struct line *l);
 char *w_space(const char *l);
 void data_clear(struct line *l, struct mmake *m);
 struct mmake *parse(const char *filename);
+int exec(struct mmake *m, char *name, char *need);
+char *expe(char *val, struct mmake *m, struct line *s);
+
 
 #endif
