@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     printf("minimake: *** No targets.  Stop.\n");
     if(fil)
       free(filename);
-    return 1;
+    return 2;
   }
   if (pprint != 0)
   {
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
       free_m(m);
       if(fil)
         free(filename);
-      return 1;
+      return 2;
 
     }
     int r= exec( m, cur->data.rule.target, NULL);

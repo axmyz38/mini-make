@@ -36,7 +36,7 @@ int exec(struct mmake *m, char *name, char *need)
       printf("minimake: *** No rule to make target '%s', needed by '%s'.  Stop.\n", name, need);
     else 
       printf("minimake: *** No rule to make target '%s'.  Stop.\n", name);
-    return 1;
+    return 2;
   }
 
   for (int i =0; exe->data.rule.deps[i]; i++)
@@ -74,7 +74,7 @@ int exec(struct mmake *m, char *name, char *need)
       if(ret!=0)
       {
         printf("minimake: *** [%s] Error %d\n", name, ret);
-        return 1;
+        return 2;
       }
     }
     cmd=cmd->next;
